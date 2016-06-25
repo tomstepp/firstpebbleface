@@ -53,7 +53,7 @@ static void main_load(Window *w) {
   text_layer_set_background_color(weather, GColorBlack);
   text_layer_set_text_color(weather, GColorBlueMoon);
   text_layer_set_text_alignment(weather, GTextAlignmentCenter);
-  text_layer_set_text(weather, "LOADING...");
+  text_layer_set_text(weather, "QUE PASA?");
   
   // create text font
   time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_EXTROS_48));
