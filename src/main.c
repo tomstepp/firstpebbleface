@@ -1,6 +1,7 @@
 #include <pebble.h>
 static Window *main_window;
 static TextLayer *time_layer;
+static GFont time_font;
 
 static void update_time() {
   // get time structure
@@ -29,8 +30,12 @@ static void main_load(Window *w) {
   // make layout look like watchface
   text_layer_set_background_color(time_layer, GColorBlack);
   text_layer_set_text_color(time_layer, GColorBlueMoon);
-  text_layer_set_font(time_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD));
+  text_layer_set_text(time_layer, "00:00");
   text_layer_set_text_alignment(time_layer, GTextAlignmentCenter);
+  
+  // create font
+  time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_EXTROS_48));
+  text_layer_set_font(time_layer, time_font);
   
   // add it as child to main window layer
   layer_add_child(window_layer, text_layer_get_layer(time_layer));
@@ -38,6 +43,9 @@ static void main_load(Window *w) {
 static void main_unload(Window *w) {
   // destroy textlayer
   text_layer_destroy(time_layer);
+  
+  // destory font
+  fonts_unload_custom_font(time_font);
 }
 static void init() {
   // create new window
