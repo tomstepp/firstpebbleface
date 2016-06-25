@@ -1,5 +1,7 @@
 #include <pebble.h>
 
+// --- elements of watchface --- //
+
 static Window *main_window;
 
 static TextLayer *time_layer;
@@ -7,6 +9,8 @@ static TextLayer *weather;
 
 static GFont time_font;
 static GFont weather_font;
+
+// --- time handler and updates --- //
 
 static void update_time() {
   // get time structure
@@ -24,6 +28,8 @@ static void update_time() {
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   update_time();
 }
+
+// --- main window load/unload --- //
 
 static void main_load(Window *w) {
   // get window info
@@ -72,6 +78,26 @@ static void main_unload(Window *w) {
   fonts_unload_custom_font(weather_font);
 }
 
+// --- app message --- //
+
+static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
+  
+}
+
+static void inbox_dropped_callback(AppMessageResult reason, void *context) {
+  APP_LOG(APP_LOG_LEVEL_ERROR, "Message dropped!");
+}
+
+static void outbox_failed_callback(DictionaryIterator *iterator, AppMessageResult reason, void *context) {
+  APP_LOG(APP_LOG_LEVEL_ERROR, "Outbox send failed!");
+}
+
+static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
+  APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
+}
+
+// --- init, deinit, and main --- //
+
 static void init() {
   // create new window
   main_window = window_create();
@@ -94,6 +120,17 @@ static void init() {
   // register with timer service
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
   
+  // app message register calls
+  app_message_register_inbox_received(inbox_received_callback);
+  
+  // Open AppMessage
+  const int inbox_size = 128;
+  const int outbox_size = 128;
+  app_message_open(inbox_size, outbox_size);
+  
+  app_message_register_inbox_dropped(inbox_dropped_callback);
+  app_message_register_outbox_failed(outbox_failed_callback);
+  app_message_register_outbox_sent(outbox_sent_callback);
 }
 
 static void deinit() {
