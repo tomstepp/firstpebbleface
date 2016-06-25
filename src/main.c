@@ -27,8 +27,8 @@ static void main_load(Window *w) {
       GRect(0, PBL_IF_ROUND_ELSE(58,52), bounds.size.w, 50));
   
   // make layout look like watchface
-  text_layer_set_background_color(time_layer, GColorClear);
-  text_layer_set_text_color(time_layer, GColorBlack);
+  text_layer_set_background_color(time_layer, GColorBlack);
+  text_layer_set_text_color(time_layer, GColorBlueMoon);
   text_layer_set_font(time_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD));
   text_layer_set_text_alignment(time_layer, GTextAlignmentCenter);
   
