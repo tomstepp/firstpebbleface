@@ -1,0 +1,29 @@
+{
+    "author": "oysterChatter",
+    "dependencies": {},
+    "keywords": [],
+    "name": "firstwatchface",
+    "pebble": {
+        "capabilities": [
+            ""
+        ],
+        "displayName": "firstWatchFace",
+        "enableMultiJS": true,
+        "messageKeys": [],
+        "projectType": "native",
+        "resources": {
+            "media": []
+        },
+        "sdkVersion": "3",
+        "targetPlatforms": [
+            "aplite",
+            "basalt",
+            "chalk"
+        ],
+        "uuid": "01653bd5-0b1b-4e0c-ba85-aefeb402237e",
+        "watchapp": {
+            "watchface": true
+        }
+    },
+    "version": "1.0.0"
+}
