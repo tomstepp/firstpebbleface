@@ -43,6 +43,9 @@ static void init() {
   // create new window
   main_window = window_create();
   
+  // update parameters - black background
+  window_set_background_color(main_window, GColorBlack);
+  
   // set handlers for window elements
   window_set_window_handlers(main_window, (WindowHandlers) {
     .load = main_load,
