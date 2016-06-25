@@ -1,7 +1,12 @@
 #include <pebble.h>
+
 static Window *main_window;
+
 static TextLayer *time_layer;
+static TextLayer *weather;
+
 static GFont time_font;
+static GFont weather_font;
 
 static void update_time() {
   // get time structure
@@ -15,38 +20,58 @@ static void update_time() {
   // display time on textlayer
   text_layer_set_text(time_layer, buf);
 }
+
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   update_time();
 }
+
 static void main_load(Window *w) {
   // get window info
   Layer *window_layer = window_get_root_layer(w);
   GRect bounds = layer_get_bounds(window_layer);
   
-  // create textlayer
+  // create text layer
   time_layer = text_layer_create(
       GRect(0, PBL_IF_ROUND_ELSE(58,52), bounds.size.w, 50));
   
-  // make layout look like watchface
+  // create weather layer
+  weather = text_layer_create(GRect(0, PBL_IF_BW_ELSE(125, 120), bounds.size.w, 25));
+  
+  // style text layer
   text_layer_set_background_color(time_layer, GColorBlack);
   text_layer_set_text_color(time_layer, GColorBlueMoon);
   text_layer_set_text(time_layer, "00:00");
   text_layer_set_text_alignment(time_layer, GTextAlignmentCenter);
   
-  // create font
+  // style weather layer
+  text_layer_set_background_color(weather, GColorBlack);
+  text_layer_set_text_color(weather, GColorBlueMoon);
+  text_layer_set_text_alignment(weather, GTextAlignmentCenter);
+  text_layer_set_text(weather, "LOADING...");
+  
+  // create text font
   time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_EXTROS_48));
   text_layer_set_font(time_layer, time_font);
   
-  // add it as child to main window layer
-  layer_add_child(window_layer, text_layer_get_layer(time_layer));
-}
-static void main_unload(Window *w) {
-  // destroy textlayer
-  text_layer_destroy(time_layer);
+  // create weather font
+  weather_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_EXTROS_18));
+  text_layer_set_font(weather, weather_font);
   
-  // destory font
-  fonts_unload_custom_font(time_font);
+  // add children
+  layer_add_child(window_layer, text_layer_get_layer(time_layer));
+  layer_add_child(window_get_root_layer(w), text_layer_get_layer(weather));
 }
+
+static void main_unload(Window *w) {
+  // destroy layers
+  text_layer_destroy(time_layer);
+  text_layer_destroy(weather);
+  
+  // destory fonts
+  fonts_unload_custom_font(time_font);
+  fonts_unload_custom_font(weather_font);
+}
+
 static void init() {
   // create new window
   main_window = window_create();
@@ -70,10 +95,12 @@ static void init() {
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
   
 }
+
 static void deinit() {
   // destroy main window
   window_destroy(main_window);
 }
+
 int main(void) {
   init();
   app_event_loop();
