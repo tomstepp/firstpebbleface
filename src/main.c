@@ -1,4 +1,4 @@
-///----- My first watchface (time & temp) -----///
+///----- My first watchface (time + date + weather + battery) -----///
 
 // --- libraries and definitions --- //
 #include <pebble.h>
@@ -107,7 +107,7 @@ static void main_load(Window *w) {
   
   // create text layer
   time_layer = text_layer_create(
-      GRect(0, 65, bounds.size.w, 50));
+      GRect(0, 65, bounds.size.w, 60));
   
   // create weather layer
   weather = text_layer_create(
@@ -121,12 +121,12 @@ static void main_load(Window *w) {
   
   // style weather layer
   text_layer_set_background_color(weather, GColorBlack);
-  text_layer_set_text_color(weather, GColorBlueMoon);
+  text_layer_set_text_color(weather, GColorWhite);
   text_layer_set_text_alignment(weather, GTextAlignmentCenter);
   text_layer_set_text(weather, "QUE PASA?");
   
   // create text layer font
-  time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_EXTROS_50));
+  time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_EXTROS_60));
   text_layer_set_font(time_layer, time_font);
   
   // create weather layer font
