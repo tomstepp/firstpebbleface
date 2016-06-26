@@ -1,17 +1,52 @@
+///----- My first watchface (time & temp) -----///
+
+// --- libraries and definitions --- //
 #include <pebble.h>
+#define KEY_TEMPERATURE 0
+#define KEY_CONDITIONS 1
 
 // --- elements of watchface --- //
-
 static Window *main_window;
-
 static TextLayer *time_layer;
 static TextLayer *weather;
-
 static GFont time_font;
 static GFont weather_font;
 
-// --- time handler and updates --- //
+// --- app message --- //
+static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
+  // Store incoming information
+  static char temperature_buffer[8];
+  static char conditions_buffer[32];
+  static char weather_layer_buffer[32];
 
+  // Read tuples for data
+  Tuple *temp_tuple = dict_find(iterator, MESSAGE_KEY_TEMPERATURE);
+  Tuple *conditions_tuple = dict_find(iterator, MESSAGE_KEY_CONDITIONS);
+
+  // If all data is available, use it
+  if(temp_tuple && conditions_tuple) {
+    snprintf(temperature_buffer, sizeof(temperature_buffer), "%d F", (int)temp_tuple->value->int32);
+    snprintf(conditions_buffer, sizeof(conditions_buffer), "%s", conditions_tuple->value->cstring);
+
+    // Assemble full string and display
+    snprintf(weather_layer_buffer, sizeof(weather_layer_buffer), "%s, %s", temperature_buffer, conditions_buffer);
+    text_layer_set_text(weather, weather_layer_buffer);
+  }
+}
+
+static void inbox_dropped_callback(AppMessageResult reason, void *context) {
+  APP_LOG(APP_LOG_LEVEL_ERROR, "Message dropped!");
+}
+
+static void outbox_failed_callback(DictionaryIterator *iterator, AppMessageResult reason, void *context) {
+  APP_LOG(APP_LOG_LEVEL_ERROR, "Outbox send failed!");
+}
+
+static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
+  APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
+}
+
+// --- time handler and updates --- //
 static void update_time() {
   // get time structure
   time_t temp = time(NULL);
@@ -27,10 +62,22 @@ static void update_time() {
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   update_time();
+  
+  // Get weather update every 30 minutes
+  if(tick_time->tm_min % 30 == 0) {
+    // Begin dictionary
+    DictionaryIterator *iter;
+    app_message_outbox_begin(&iter);
+  
+    // Add a key-value pair
+    dict_write_uint8(iter, 0, 0);
+  
+    // Send the message
+    app_message_outbox_send();
+  }
 }
 
 // --- main window load/unload --- //
-
 static void main_load(Window *w) {
   // get window info
   Layer *window_layer = window_get_root_layer(w);
@@ -41,7 +88,8 @@ static void main_load(Window *w) {
       GRect(0, PBL_IF_ROUND_ELSE(58,52), bounds.size.w, 50));
   
   // create weather layer
-  weather = text_layer_create(GRect(0, PBL_IF_BW_ELSE(125, 120), bounds.size.w, 25));
+  weather = text_layer_create(
+    GRect(0, PBL_IF_BW_ELSE(125, 120), bounds.size.w, 25));
   
   // style text layer
   text_layer_set_background_color(time_layer, GColorBlack);
@@ -55,13 +103,12 @@ static void main_load(Window *w) {
   text_layer_set_text_alignment(weather, GTextAlignmentCenter);
   text_layer_set_text(weather, "QUE PASA?");
   
-  // create text font
-  time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_EXTROS_48));
+  // create text layer font
+  time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_EXTROS_50));
   text_layer_set_font(time_layer, time_font);
   
-  // create weather font
-  weather_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_EXTROS_18));
-  text_layer_set_font(weather, weather_font);
+  // create weather layer font
+  text_layer_set_font(weather, fonts_get_system_font(FONT_KEY_GOTHIC_24));
   
   // add children
   layer_add_child(window_layer, text_layer_get_layer(time_layer));
@@ -78,26 +125,7 @@ static void main_unload(Window *w) {
   fonts_unload_custom_font(weather_font);
 }
 
-// --- app message --- //
-
-static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
-  
-}
-
-static void inbox_dropped_callback(AppMessageResult reason, void *context) {
-  APP_LOG(APP_LOG_LEVEL_ERROR, "Message dropped!");
-}
-
-static void outbox_failed_callback(DictionaryIterator *iterator, AppMessageResult reason, void *context) {
-  APP_LOG(APP_LOG_LEVEL_ERROR, "Outbox send failed!");
-}
-
-static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
-  APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
-}
-
 // --- init, deinit, and main --- //
-
 static void init() {
   // create new window
   main_window = window_create();
@@ -122,15 +150,14 @@ static void init() {
   
   // app message register calls
   app_message_register_inbox_received(inbox_received_callback);
+  app_message_register_inbox_dropped(inbox_dropped_callback);
+  app_message_register_outbox_failed(outbox_failed_callback);
+  app_message_register_outbox_sent(outbox_sent_callback);
   
   // Open AppMessage
   const int inbox_size = 128;
   const int outbox_size = 128;
   app_message_open(inbox_size, outbox_size);
-  
-  app_message_register_inbox_dropped(inbox_dropped_callback);
-  app_message_register_outbox_failed(outbox_failed_callback);
-  app_message_register_outbox_sent(outbox_sent_callback);
 }
 
 static void deinit() {

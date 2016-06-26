@@ -5,11 +5,14 @@
     "name": "firstwatchface",
     "pebble": {
         "capabilities": [
-            ""
+            "location"
         ],
         "displayName": "firstWatchFace",
         "enableMultiJS": true,
-        "messageKeys": [],
+        "messageKeys": [
+            "TEMPERATURE",
+            "CONDITIONS"
+        ],
         "projectType": "native",
         "resources": {
             "media": [
@@ -21,7 +24,7 @@
                 },
                 {
                     "file": "fonts/extros.ttf",
-                    "name": "FONT_EXTROS_48",
+                    "name": "FONT_EXTROS_50",
                     "targetPlatforms": null,
                     "type": "font"
                 }
