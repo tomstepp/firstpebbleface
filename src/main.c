@@ -107,7 +107,7 @@ static void main_load(Window *w) {
   
   // create text layer
   time_layer = text_layer_create(
-      GRect(0, 75, bounds.size.w, 50));
+      GRect(0, 65, bounds.size.w, 50));
   
   // create weather layer
   weather = text_layer_create(
@@ -137,7 +137,7 @@ static void main_load(Window *w) {
   layer_add_child(window_get_root_layer(w), text_layer_get_layer(weather));
   
   // Date Layer
-  date_layer = text_layer_create(GRect(0, 40, bounds.size.w, 25));
+  date_layer = text_layer_create(GRect(0, 35, bounds.size.w, 25));
   text_layer_set_text_color(date_layer, GColorWhite);
   text_layer_set_background_color(date_layer, GColorClear);
   text_layer_set_text_alignment(date_layer, GTextAlignmentCenter);
@@ -145,7 +145,7 @@ static void main_load(Window *w) {
   layer_add_child(window_get_root_layer(w), text_layer_get_layer(date_layer));
   
   // Battery Layer
-  battery_layer = text_layer_create(GRect(0, 10, bounds.size.w, 25));
+  battery_layer = text_layer_create(GRect(0, 5, bounds.size.w, 25));
   text_layer_set_text_color(battery_layer, GColorWhite);
   text_layer_set_background_color(battery_layer, GColorClear);
   text_layer_set_text_alignment(battery_layer, GTextAlignmentCenter);
