@@ -9,9 +9,22 @@
 static Window *main_window;
 static TextLayer *time_layer;
 static TextLayer *date_layer;
+static TextLayer *battery_layer;
 static TextLayer *weather;
 static GFont time_font;
 static GFont weather_font;
+
+// --- battery --- //
+static int battery_level;
+static void battery_callback(BatteryChargeState state) {
+  // Record the new battery level
+  battery_level = state.charge_percent;
+  // Print level to screen
+  static char battery_buffer[8];
+  snprintf(battery_buffer, sizeof(battery_buffer), "%d %%", battery_level);
+  text_layer_set_text(battery_layer, battery_buffer);
+}
+
 
 // --- app message --- //
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
@@ -94,11 +107,11 @@ static void main_load(Window *w) {
   
   // create text layer
   time_layer = text_layer_create(
-      GRect(0, PBL_IF_ROUND_ELSE(58,52), bounds.size.w, 50));
+      GRect(0, 75, bounds.size.w, 50));
   
   // create weather layer
   weather = text_layer_create(
-    GRect(0, PBL_IF_BW_ELSE(125, 120), bounds.size.w, 25));
+    GRect(0, 130, bounds.size.w, 25));
   
   // style text layer
   text_layer_set_background_color(time_layer, GColorBlack);
@@ -124,23 +137,29 @@ static void main_load(Window *w) {
   layer_add_child(window_get_root_layer(w), text_layer_get_layer(weather));
   
   // Date Layer
-  // Create date TextLayer
-  date_layer = text_layer_create(GRect(0, 25, bounds.size.w, 25));
+  date_layer = text_layer_create(GRect(0, 40, bounds.size.w, 25));
   text_layer_set_text_color(date_layer, GColorWhite);
   text_layer_set_background_color(date_layer, GColorClear);
   text_layer_set_text_alignment(date_layer, GTextAlignmentCenter);
-  
   text_layer_set_font(date_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24));
-  
-  // Add to Window
   layer_add_child(window_get_root_layer(w), text_layer_get_layer(date_layer));
-
+  
+  // Battery Layer
+  battery_layer = text_layer_create(GRect(0, 10, bounds.size.w, 25));
+  text_layer_set_text_color(battery_layer, GColorWhite);
+  text_layer_set_background_color(battery_layer, GColorClear);
+  text_layer_set_text_alignment(battery_layer, GTextAlignmentCenter);
+  text_layer_set_font(battery_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24));
+  layer_add_child(window_get_root_layer(w), text_layer_get_layer(battery_layer));
+  text_layer_set_text(battery_layer, "battery level");
 }
 
 static void main_unload(Window *w) {
   // destroy layers
   text_layer_destroy(time_layer);
   text_layer_destroy(weather);
+  //text_layer_destory(battery_layer);
+  //text_layer_destory(date_layer);
   
   // destory fonts
   fonts_unload_custom_font(time_font);
@@ -180,6 +199,12 @@ static void init() {
   const int inbox_size = 128;
   const int outbox_size = 128;
   app_message_open(inbox_size, outbox_size);
+  
+  // Register for battery level updates
+  battery_state_service_subscribe(battery_callback);
+  
+  // Ensure battery level is displayed from the start
+  battery_callback(battery_state_service_peek());
 }
 
 static void deinit() {
