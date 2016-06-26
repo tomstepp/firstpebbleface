@@ -18,13 +18,13 @@
             "media": [
                 {
                     "file": "fonts/extros.ttf",
-                    "name": "FONT_EXTROS_18",
+                    "name": "FONT_EXTROS_50",
                     "targetPlatforms": null,
                     "type": "font"
                 },
                 {
                     "file": "fonts/extros.ttf",
-                    "name": "FONT_EXTROS_50",
+                    "name": "FONT_EXTROS_18",
                     "targetPlatforms": null,
                     "type": "font"
                 }

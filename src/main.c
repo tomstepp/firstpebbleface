@@ -8,6 +8,7 @@
 // --- elements of watchface --- //
 static Window *main_window;
 static TextLayer *time_layer;
+static TextLayer *date_layer;
 static TextLayer *weather;
 static GFont time_font;
 static GFont weather_font;
@@ -58,6 +59,14 @@ static void update_time() {
   
   // display time on textlayer
   text_layer_set_text(time_layer, buf);
+  
+  // Copy date into buffer from tm structure
+  static char date_buffer[16];
+  strftime(date_buffer, sizeof(date_buffer), "%a %d %b", tick_time);
+
+  // Show the date
+  text_layer_set_text(date_layer, date_buffer);
+
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
@@ -113,6 +122,19 @@ static void main_load(Window *w) {
   // add children
   layer_add_child(window_layer, text_layer_get_layer(time_layer));
   layer_add_child(window_get_root_layer(w), text_layer_get_layer(weather));
+  
+  // Date Layer
+  // Create date TextLayer
+  date_layer = text_layer_create(GRect(0, 25, bounds.size.w, 25));
+  text_layer_set_text_color(date_layer, GColorWhite);
+  text_layer_set_background_color(date_layer, GColorClear);
+  text_layer_set_text_alignment(date_layer, GTextAlignmentCenter);
+  
+  text_layer_set_font(date_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24));
+  
+  // Add to Window
+  layer_add_child(window_get_root_layer(w), text_layer_get_layer(date_layer));
+
 }
 
 static void main_unload(Window *w) {
